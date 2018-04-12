@@ -38,7 +38,7 @@ function sassTask() {
     .pipe(debug({ title: 'sass: ' }))
     .pipe(sass().on('error', sass.logError))
     .pipe(rename({ extname: `.${sassOpts.rename}` }))
-    .pipe(gulp.dest(dist));
+    .pipe(gulp.dest(src));
 }
    
 

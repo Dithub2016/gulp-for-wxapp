@@ -3,7 +3,8 @@ const
     clean = require('gulp-clean'),
     sass = require('gulp-sass'),
     watch = require('gulp-watch'),
-    rename = require('gulp-rename');
+    rename = require('gulp-rename'),
+    path = require('path');
 
 const
     sassOpts = { rename: 'wxss', target: 'scss' },
@@ -16,34 +17,28 @@ gulp.task('clean', function () {
     .pipe(clean());
 });
 
-gulp.task('move', moveTask());
-function moveTask(_src = [`${src}/**/*`, `!${src}/**/*.${sassOpts.target}`]) {
-    return function () {
-        console.log(`move: ${_src}`)
-        return gulp
-        .src(_src)
-        .pipe(gulp.dest(dist));
-    };
+gulp.task('move', moveTask);
+function moveTask() {
+    return gulp
+    .src([`${src}/**/*`, `!${src}/**/*.${sassOpts.target}`])
+    .pipe(gulp.dest(dist));
 }
 
-gulp.task('sass', sassTask());
-function sassTask(_src = `${src}/**/*.${sassOpts.target}`) {
-    return function () {
-        console.log(`sass: ${_src}`)
-        return gulp
-        .src(_src)
-        .pipe(sass().on('error', sass.logError))
-        .pipe(rename({ extname: `.${sassOpts.rename}` }))
-        .pipe(gulp.dest(dist));
-    }
+gulp.task('sass', sassTask);
+function sassTask() {
+    return gulp
+    .src(`${src}/**/*.${sassOpts.target}`)
+    .pipe(sass().on('error', sass.logError))
+    .pipe(rename({ extname: `.${sassOpts.rename}` }))
+    .pipe(gulp.dest(dist));
 }
    
 
 gulp.task('dev', ['sass', 'move'], function () {
 
     watch(`${src}/**/*.${sassOpts.target}`)
-    .on('add', _src => sassTask(_src)())
-    .on('change', _src => sassTask(_src)())
+    .on('add', sassTask)
+    .on('change', sassTask)
     .on('unlink', function (_src) {
         const _file = _src.replace(src, dist).replace(sassOpts.target, sassOpts.rename);
         console.log(`delete: ${_file}`);
@@ -51,8 +46,8 @@ gulp.task('dev', ['sass', 'move'], function () {
     });
 
     watch([`${src}/**/*`, `!${src}/**/*.${sassOpts.target}`])
-    .on('add', _src => moveTask(_src)())
-    .on('change', _src => moveTask(_src)())
+    .on('add', moveTask)
+    .on('change', moveTask)
     .on('unlink', function (_src) {
         const _file = _src.replace(src, dist);
         console.log(`delete: ${_file}`);

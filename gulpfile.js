@@ -9,9 +9,10 @@ const
     path = require('path');
 
 const
-    sassOpts = { rename: 'wxss', target: 'scss' },
     src = 'src',
-    dist = 'dist';
+    dist = 'dist',
+    sassOpts = { rename: 'wxss', target: 'scss', src: `${src}/**/*.scss` },
+    moveOpts = { src: [`${src}/**/*`, `!${src}/**/*.scss`] };
 
 gulp.task('clean', function () {
     return gulp
@@ -23,7 +24,7 @@ gulp.task('clean', function () {
 gulp.task('move', moveTask);
 function moveTask() {
     return gulp
-    .src([`${src}/**/*`, `!${src}/**/*.${sassOpts.target}`])
+    .src(moveOpts.src)
     .pipe(changed(dist))
     .pipe(debug({ title: 'move: ' }))
     .pipe(gulp.dest(dist));
@@ -32,7 +33,7 @@ function moveTask() {
 gulp.task('sass', sassTask);
 function sassTask() {
     return gulp
-    .src(`${src}/**/*.${sassOpts.target}`)
+    .src(sassOpts.src)
     .pipe(changed(dist, {extension: `.${sassOpts.rename}`}))
     .pipe(debug({ title: 'sass: ' }))
     .pipe(sass().on('error', sass.logError))
@@ -43,7 +44,7 @@ function sassTask() {
 
 gulp.task('dev', ['sass', 'move'], function () {
 
-    watch(`${src}/**/*.${sassOpts.target}`)
+    watch(sassOpts.src)
     .on('add', sassTask)
     .on('change', sassTask)
     .on('unlink', function (_src) {
@@ -54,7 +55,7 @@ gulp.task('dev', ['sass', 'move'], function () {
         .pipe(clean());
     });
 
-    watch([`${src}/**/*`, `!${src}/**/*.${sassOpts.target}`])
+    watch(moveOpts.src)
     .on('add', moveTask)
     .on('change', moveTask)
     .on('unlink', function (_src) {
